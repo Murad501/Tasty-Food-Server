@@ -2,7 +2,7 @@ const express = require("express");
 const app = express();
 const cors = require("cors");
 const port = process.env.PORT || 5000;
-const { MongoClient, ServerApiVersion } = require("mongodb");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 require("dotenv").config();
 
 app.use(express.json());
@@ -22,16 +22,43 @@ const client = new MongoClient(uri, {
   serverApi: ServerApiVersion.v1,
 });
 
+console.log(new Date());
+
 const run = async () => {
   try {
     const foodCollections = client.db("tasty-food").collection("foods");
-    const categoryCollections = client.db('tasty-food').collection('categories')
+    const categoryCollections = client
+      .db("tasty-food")
+      .collection("categories");
 
-    app.get('/categories', async(req, res)=> {
-        const query = {}
-        const result = await categoryCollections.find(query).toArray()
+    app.get("/foods", async (req, res) => {
+      const query = {};
+      const result = await foodCollections.find(query).toArray();
+      res.send(result);
+    });
+
+    app.get("/top-foods", async (req, res) => {
+      const query = {};
+      const result = (await foodCollections.find(query).toArray())
+        .sort((a, b) => b.reviews - a.reviews)
+        .slice(0, 3);
+      res.send(result);
+    });
+
+    app.get('/category-food/:id', async(req, res)=>{
+        const id = req.params.id
+        console.log(id)
+        const query = {categoryId: id}
+        const result = await foodCollections.find(query).toArray()
+        console.log(result)
         res.send(result)
     })
+
+    app.get("/categories", async (req, res) => {
+      const query = {};
+      const result = await categoryCollections.find(query).toArray();
+      res.send(result);
+    });
   } catch {}
 };
 
