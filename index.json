@@ -1,0 +1,26 @@
+[
+  {
+    "picture": "https://i.ibb.co/gFtJQgw/drinks.jpg",
+    "name": "Drinks"
+  },
+  {
+    "picture": "https://i.ibb.co/mS1nFx2/desserts.jpg",
+    "name": "Desserts"
+  },
+  {
+    "picture": "https://i.ibb.co/xC3NNDF/main-dishes.jpg",
+    "name": "Main Dishes"
+  },
+  {
+    "picture": "https://i.ibb.co/TMDGZHb/appetizers.jpg",
+    "name": "Appetizers"
+  },
+  {
+    "picture": "https://i.ibb.co/G5ppBjD/salads.jpg",
+    "name": "Salads"
+  },
+  {
+    "picture": "https://i.ibb.co/1TJGnM2/soups.jpg",
+    "name": "Soups"
+  }
+]
