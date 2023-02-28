@@ -4,6 +4,7 @@ const cors = require("cors");
 const port = process.env.PORT || 5000;
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 require("dotenv").config();
+const jwt = require("jsonwebtoken");
 
 app.use(express.json());
 app.use(cors());
@@ -27,7 +28,7 @@ console.log(new Date());
 const run = async () => {
   try {
     const foodCollections = client.db("tasty-food").collection("foods");
-    const reviewCollection = client.db("tasty-food").collection("reviews");
+    const reviewCollections = client.db("tasty-food").collection("reviews");
     const categoryCollections = client
       .db("tasty-food")
       .collection("categories");
@@ -58,7 +59,22 @@ const run = async () => {
 
     app.post("/reviews", async (req, res) => {
       const review = req.body;
-      const result = await reviewCollection.insertOne(review);
+      const result = await reviewCollections.insertOne(review);
+      res.send(result);
+    });
+
+    app.get("/reviews", async (req, res) => {
+      const email = req.query.email;
+      const query = { userEmail: email };
+      const result = await reviewCollections.find(query).toArray();
+      res.send(result);
+    });
+
+    app.get("/food-reviews", async (req, res) => {
+      const id = req.query.id;
+      const query = { foodId: id };
+      const result = await reviewCollections.find(query).toArray();
+      console.log(result);
       res.send(result);
     });
 
@@ -77,6 +93,14 @@ const run = async () => {
       const query = {};
       const result = await categoryCollections.find(query).toArray();
       res.send(result);
+
+      app.get("/jwt", async (req, res) => {
+        const email = req.params.email;
+        const token = jwt.sign({ email }, process.env.ACCESS_TOKEN, {
+          expiresIn: "7d",
+        });
+        res.send({ token });
+      });
     });
   } catch {}
 };
