@@ -27,13 +27,22 @@ console.log(new Date());
 const run = async () => {
   try {
     const foodCollections = client.db("tasty-food").collection("foods");
+    const reviewCollection = client.db("tasty-food").collection("reviews");
     const categoryCollections = client
       .db("tasty-food")
       .collection("categories");
 
+    //foods
+
     app.get("/foods", async (req, res) => {
       const query = {};
       const result = await foodCollections.find(query).toArray();
+      res.send(result);
+    });
+
+    app.post("/foods", async (req, res) => {
+      const food = req.body;
+      const result = await foodCollections.insertOne(food);
       res.send(result);
     });
 
@@ -45,14 +54,24 @@ const run = async () => {
       res.send(result);
     });
 
-    app.get('/category-food/:id', async(req, res)=>{
-        const id = req.params.id
-        console.log(id)
-        const query = {categoryId: id}
-        const result = await foodCollections.find(query).toArray()
-        console.log(result)
-        res.send(result)
-    })
+    //review
+
+    app.post("/reviews", async (req, res) => {
+      const review = req.body;
+      const result = await reviewCollection.insertOne(review);
+      res.send(result);
+    });
+
+    //category
+
+    app.get("/category-food/:id", async (req, res) => {
+      const id = req.params.id;
+      console.log(id);
+      const query = { categoryId: id };
+      const result = await foodCollections.find(query).toArray();
+      console.log(result);
+      res.send(result);
+    });
 
     app.get("/categories", async (req, res) => {
       const query = {};
