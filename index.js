@@ -9,12 +9,24 @@ const jwt = require("jsonwebtoken");
 app.use(express.json());
 app.use(cors());
 
-const userName = "Person14";
-const password = "1ird016vxtOjD82x";
-
 app.get("/", (req, res) => {
   res.send("data is coming soon");
 });
+
+const verifyJWT = (req, res, next) => {
+  const headers = req.headers.authorization;
+  if (!headers) {
+    return res.status(401).send({ message: "unauthorized access" });
+  }
+  const token = headers.split(" ")[1];
+  jwt.verify(token, process.env.ACCESS_TOKEN, (error, decoded) => {
+    if (error) {
+      return res.status(401).send({ message: "unauthorized access" });
+    }
+    req.decoded = decoded;
+    next();
+  });
+};
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@user1.istzhai.mongodb.net/?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, {
@@ -23,7 +35,6 @@ const client = new MongoClient(uri, {
   serverApi: ServerApiVersion.v1,
 });
 
-console.log(new Date());
 
 const run = async () => {
   try {
@@ -63,8 +74,21 @@ const run = async () => {
       res.send(result);
     });
 
-    app.get("/reviews", async (req, res) => {
+    app.get("/top-reviews", async (req, res) => {
+      const query = {};
+      const result = await (
+        await reviewCollections.find(query).toArray()
+      ).sort((a, b) => b.liked - a.liked).slice(0, 3);
+
+      res.send(result);
+    });
+
+    app.get("/my-reviews", verifyJWT, async (req, res) => {
+      const decodedEmail = req.decoded.email;
       const email = req.query.email;
+      if (email !== decodedEmail) {
+        return res.status(403).send({ message: "forbidden" });
+      }
       const query = { userEmail: email };
       const result = await reviewCollections.find(query).toArray();
       res.send(result);
@@ -74,7 +98,6 @@ const run = async () => {
       const id = req.query.id;
       const query = { foodId: id };
       const result = await reviewCollections.find(query).toArray();
-      console.log(result);
       res.send(result);
     });
 
@@ -82,10 +105,8 @@ const run = async () => {
 
     app.get("/category-food/:id", async (req, res) => {
       const id = req.params.id;
-      console.log(id);
       const query = { categoryId: id };
       const result = await foodCollections.find(query).toArray();
-      console.log(result);
       res.send(result);
     });
 
@@ -95,7 +116,7 @@ const run = async () => {
       res.send(result);
 
       app.get("/jwt", async (req, res) => {
-        const email = req.params.email;
+        const email = req.query.email;
         const token = jwt.sign({ email }, process.env.ACCESS_TOKEN, {
           expiresIn: "7d",
         });
