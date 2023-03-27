@@ -2,7 +2,7 @@ const express = require("express");
 const app = express();
 const cors = require("cors");
 const port = process.env.PORT || 5000;
-const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
+const { MongoClient, ServerApiVersion } = require("mongodb");
 require("dotenv").config();
 const jwt = require("jsonwebtoken");
 
@@ -13,28 +13,12 @@ app.get("/", (req, res) => {
   res.send("data is coming soon");
 });
 
-const verifyJWT = (req, res, next) => {
-  const headers = req.headers.authorization;
-  if (!headers) {
-    return res.status(401).send({ message: "unauthorized access" });
-  }
-  const token = headers.split(" ")[1];
-  jwt.verify(token, process.env.ACCESS_TOKEN, (error, decoded) => {
-    if (error) {
-      return res.status(401).send({ message: "unauthorized access" });
-    }
-    req.decoded = decoded;
-    next();
-  });
-};
-
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@user1.istzhai.mongodb.net/?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
   serverApi: ServerApiVersion.v1,
 });
-
 
 const run = async () => {
   try {
@@ -76,9 +60,9 @@ const run = async () => {
 
     app.get("/top-reviews", async (req, res) => {
       const query = {};
-      const result = await (
-        await reviewCollections.find(query).toArray()
-      ).sort((a, b) => b.liked - a.liked).slice(0, 3);
+      const result = await (await reviewCollections.find(query).toArray())
+        .sort((a, b) => b.liked - a.liked)
+        .slice(0, 3);
 
       res.send(result);
     });
@@ -114,14 +98,6 @@ const run = async () => {
       const query = {};
       const result = await categoryCollections.find(query).toArray();
       res.send(result);
-
-      app.get("/jwt", async (req, res) => {
-        const email = req.query.email;
-        const token = jwt.sign({ email }, process.env.ACCESS_TOKEN, {
-          expiresIn: "7d",
-        });
-        res.send({ token });
-      });
     });
   } catch {}
 };
