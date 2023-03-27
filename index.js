@@ -30,6 +30,8 @@ const run = async () => {
 
     //foods
 
+   
+
     app.get("/foods", async (req, res) => {
       const query = {};
       const result = await foodCollections.find(query).toArray();
@@ -67,12 +69,9 @@ const run = async () => {
       res.send(result);
     });
 
-    app.get("/my-reviews", verifyJWT, async (req, res) => {
-      const decodedEmail = req.decoded.email;
+    app.get("/my-reviews", async (req, res) => {
       const email = req.query.email;
-      if (email !== decodedEmail) {
-        return res.status(403).send({ message: "forbidden" });
-      }
+
       const query = { userEmail: email };
       const result = await reviewCollections.find(query).toArray();
       res.send(result);
